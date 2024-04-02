@@ -7,12 +7,8 @@ class CreateScript:
     """
         Generates model classes
     """
-    def __init__(self, filename, code):
-        folder = 'models'
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-            
-        self.script_name = f'{folder}/{filename}.py'
+    def __init__(self, filepath, code):  
+        self.filepath = filepath
         self.script_code = code
 
     def create_file(self):
@@ -22,7 +18,7 @@ class CreateScript:
         Returns:
             _type_: None
         """
-        with open(self.script_name, 'w', encoding='utf-8') as file:
+        with open(self.filepath, 'w', encoding='utf-8') as file:
             file.write(self.script_code)
 
         return None
@@ -38,7 +34,7 @@ class GenerateModel:
         env = Environment(loader=file_loader, autoescape=True)
         self.template = env.get_template('model.jinja')
 
-    def render_template(self, table_attributes):
+    def render_template(self, table_attributes, filepath):
         """
             Renders template
 
@@ -47,5 +43,5 @@ class GenerateModel:
         """
 
         output = self.template.render(table_attributes=table_attributes)
-        script = CreateScript('demo_model', output)
+        script = CreateScript(filepath, output)
         script.create_file()

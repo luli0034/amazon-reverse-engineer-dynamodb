@@ -7,11 +7,8 @@ class CreateScript:
     """
         Create a script
     """
-    def __init__(self, filename, code):
-        folder = 'crud'
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        self.script_name = f'{folder}/{filename}.py'
+    def __init__(self, filepath, code):  
+        self.filepath = filepath
         self.script_code = code
 
     def create_file(self):
@@ -21,7 +18,7 @@ class CreateScript:
         Returns:
             _type_: _description_
         """        
-        with open(self.script_name, 'w') as file:
+        with open(self.filepath, 'w') as file:
             file.write(self.script_code)
 
         return None
@@ -34,10 +31,10 @@ class GenerateCrud:
         env = Environment(loader=file_loader, autoescape=True)
         self.template = env.get_template('crud.jinja')
 
-    def render_template(self, DDB_tables):
+    def render_template(self, DDB_tables, filepath):
 
         output = self.template.render(tables=DDB_tables)
 
         # print(output)
-        script = CreateScript('demo_crud', output)
+        script = CreateScript(filepath, output)
         script.create_file()

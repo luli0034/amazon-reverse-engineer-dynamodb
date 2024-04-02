@@ -6,6 +6,8 @@ Generates model and CRUD operations classes for a given JSON input file.
 """
 import argparse
 import logging
+import configparser
+import os
 from datetime import datetime
 from controller.dynamo_connection import DynamoConnection
 from controller.generate_model import GenerateModel
@@ -31,6 +33,10 @@ parser.add_argument('--file', type=str,
 # Parse the arguments
 args = parser.parse_args()
 
+# Parse the configs
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 try:
     # Read the JSON file
     with open(args.file, 'r', encoding="utf-8") as json_file:
@@ -50,12 +56,24 @@ try:
 
     # generating the Model
     logging.info('Generating Model ....')
+    model_config = config['model']
+    model_folder = model_config['folder']
+    model_filename = f"{model_config['filename']}.py"
+    if not os.path.exists(model_folder):
+        logging.info(f'Creating folder {model_folder} ....')
+        os.makedirs(model_folder)
     model_generation = GenerateModel('templates')
-    model_generation.render_template(table_attributes)
+    model_generation.render_template(table_attributes=table_attributes, filepath=os.path.join(model_folder, model_filename))
     logging.info('Model generated.')
 
     # generating the CRUD
     logging.info('Generating CRUD ....')
+    crud_config = config['crud']
+    crud_folder = crud_config['folder']
+    crud_filename = f"{crud_config['filename']}.py"
+    if not os.path.exists(crud_folder):
+        logging.info(f'Creating folder {crud_folder} ....')
+        os.makedirs(crud_folder)
     crud_generation = GenerateCrud('templates')
     ''' 
     updating the describe_table_list based on the unprocessed 
@@ -65,7 +83,7 @@ try:
         for table_name in unprocessed_tables.keys():
             describe_table_list.remove(table_name)
 
-    crud_generation.render_template(describe_table_list)
+    crud_generation.render_template(DDB_tables=describe_table_list, filepath=os.path.join(crud_folder, crud_filename))
 
     # Displaying Warning
     if unprocessed_tables:
