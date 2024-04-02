@@ -2,13 +2,17 @@
 # SPDX-License-Identifier: MIT-0
 
 from jinja2 import Environment, FileSystemLoader
-
+import os
 class CreateScript:
     """
         Generates model classes
     """
     def __init__(self, filename, code):
-        self.script_name = 'models/'+filename + '.py'
+        folder = 'models'
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            
+        self.script_name = f'{folder}/{filename}.py'
         self.script_code = code
 
     def create_file(self):
